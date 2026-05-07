@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import cors from 'cors';
@@ -44,13 +44,7 @@ if (fs.existsSync(publicDir)) {
 
     res.sendFile(path.join(publicDir, "index.html"), (err) => next(err));
   });
-}
-
-app.get('/', (req: Request, res: Response) => {
-  res.send('Hello, World!');
-});
-
-
+};
 
 
 app.listen(env.PORT, () => {
