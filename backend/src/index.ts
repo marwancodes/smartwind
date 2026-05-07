@@ -1,4 +1,5 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
+import morgan from 'morgan';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import { clerkMiddleware } from '@clerk/express';
@@ -9,7 +10,7 @@ dotenv.config();
 
 const env = getEnv();
 const app = express();
-const PORT = process.env.PORT || 5000;
+// const PORT = process.env.PORT || 5000;
 
 const rawJson = express.raw({ type: 'application/json', limit: '1mb' });
 
@@ -18,12 +19,12 @@ app.post('/webhook/clerk', rawJson, (req, res) => {
   void clerkWebhookHandler(req, res);
 });
 
-
+app.use(morgan('dev'));
 app.use(express.json());
 app.use(cors());
 app.use(clerkMiddleware());
 
-app.get('/', (req, res) => {
+app.get('/', (req: Request, res: Response) => {
   res.send('Hello, World!');
 });
 
