@@ -5,6 +5,7 @@ import cors from 'cors';
 import { clerkMiddleware } from '@clerk/express';
 import { clerkWebhookHandler } from './webhooks/clerk';
 import { getEnv } from './lib/env';
+import keepAliveCron from './lib/cron';
 
 import fs from "node:fs";
 import path from "node:path";
@@ -26,6 +27,13 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(cors());
 app.use(clerkMiddleware());
+
+
+// if you're not using req in your route handlers, you can omit it and just use _req to avoid linting errors about unused variables. Same goes for res if you don't use it.
+app.get("/health", (_req, res) => {
+  res.json({ status: "ok" });
+})
+
 
 const publicDir = path.join(process.cwd(), "public");
 if (fs.existsSync(publicDir)) {
@@ -49,4 +57,7 @@ if (fs.existsSync(publicDir)) {
 
 app.listen(env.PORT, () => {
   console.log(`Server is running on port: http://localhost:${env.PORT}`);
+  if (env.NODE_ENV === "production") {
+    keepAliveCron.start();
+  }
 });
