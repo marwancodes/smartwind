@@ -10,6 +10,10 @@ import keepAliveCron from './lib/cron';
 import fs from "node:fs";
 import path from "node:path";
 
+import meRouter from './routes/me.router';
+import productRouter from './routes/product.router';
+import streamRouter from './routes/stream.router';
+
 dotenv.config();
 
 const env = getEnv();
@@ -32,7 +36,12 @@ app.use(clerkMiddleware());
 // if you're not using req in your route handlers, you can omit it and just use _req to avoid linting errors about unused variables. Same goes for res if you don't use it.
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
-})
+});
+
+
+app.use("/api/me", meRouter);
+app.use("/api/products", productRouter);
+app.use("/api/stream", streamRouter);
 
 
 const publicDir = path.join(process.cwd(), "public");
@@ -53,6 +62,9 @@ if (fs.existsSync(publicDir)) {
     res.sendFile(path.join(publicDir, "index.html"), (err) => next(err));
   });
 };
+
+
+// todo: add error handler middleware here
 
 
 app.listen(env.PORT, () => {
