@@ -13,6 +13,7 @@ import path from "node:path";
 import meRouter from './routes/me.router';
 import productRouter from './routes/product.router';
 import streamRouter from './routes/stream.router';
+import checkoutRouter from './routes/checkout.router';
 
 dotenv.config();
 
@@ -26,6 +27,11 @@ app.post('/webhook/clerk', rawJson, (req, res) => {
   // it's important that you don't parse the webhook event data, it should be in raw format
   void clerkWebhookHandler(req, res);
 });
+
+// app.post('/webhook/polar', rawJson, (req, res) => {
+//   // it's important that you don't parse the webhook event data, it should be in raw format
+//   void polarWebhookHandler(req, res);
+// });
 
 app.use(morgan('dev'));
 app.use(express.json());
@@ -42,6 +48,7 @@ app.get("/health", (_req, res) => {
 app.use("/api/me", meRouter);
 app.use("/api/products", productRouter);
 app.use("/api/stream", streamRouter);
+app.use("/api/checkout", checkoutRouter);
 
 
 const publicDir = path.join(process.cwd(), "public");
