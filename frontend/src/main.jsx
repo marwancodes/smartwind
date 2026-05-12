@@ -2,12 +2,56 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx';
+
+import { BrowserRouter } from 'react-router';
+import * as Sentry from "@sentry/react";
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ClerkProvider } from '@clerk/react';
+
+
+const queryClient = new QueryClient();
+
+const apiBase = import.meta.env.VITE_API_URL ?? "";
+
+const tracePropagationTargets =
+  apiBase.length > 0 ? [apiBase] : typeof window !== "undefined" ? [window.location.origin] : [];
+
+// In simple terms, 'browserTracingIntegration' lets Sentry see things like:
+
+// page load timing
+// route/navigation timing
+// slow frontend interactions
+// outgoing fetch / API requests
+// frontend-to-backend trace linking
+
+Sentry.init({
+  dsn: import.meta.env.VITE_SENTRY_DSN,
+  emvironment: import.meta.env.MODE,
+  sendDefaultPii: true,
+  integrations: [
+    Sentry.browserTracingIntegration(),
+    Sentry.replayIntegration({
+      maskAllText: false,
+      maskAllInputs: false,
+      blockAllMedia: false,
+    })
+  ],
+  tracesSampleRate: 1.0,
+  tracePropagationTargets: tracePropagationTargets,
+  replaysSessionSampleRate: 1.0,
+  replaysOnErrorSampleRate: 1.0,
+  enableLogs: true,
+})
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ClerkProvider>
-      <App />
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </QueryClientProvider>
     </ClerkProvider>
   </StrictMode>,
 )
