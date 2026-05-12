@@ -10,10 +10,13 @@ import keepAliveCron from './lib/cron';
 import fs from "node:fs";
 import path from "node:path";
 
+import * as Sentry from "@sentry/node"
+
 import meRouter from './routes/me.router';
 import productRouter from './routes/product.router';
 import streamRouter from './routes/stream.router';
 import checkoutRouter from './routes/checkout.router';
+import { sentryClerkUserMiddleware } from './middleware/sentryClerkUser';
 
 dotenv.config();
 
@@ -37,6 +40,7 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(cors());
 app.use(clerkMiddleware());
+app.use(sentryClerkUserMiddleware);
 
 
 // if you're not using req in your route handlers, you can omit it and just use _req to avoid linting errors about unused variables. Same goes for res if you don't use it.
@@ -71,7 +75,31 @@ if (fs.existsSync(publicDir)) {
 };
 
 
+// sentry will be attached to the response object
+Sentry.setupExpressErrorHandler(app);
+
+
 // todo: add error handler middleware here
+app.use((_err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  const sentryId = (res as express.Response & { sentry?: string }).sentry;
+
+  res.status(500).json({
+    error: "Internal server error",
+    ...(sentryId !== undefined && { sentryId }),
+  });
+})
+
+
+app.use(
+  (_err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    const sentryId = (res as express.Response & { sentry?: string }).sentry;
+
+    res.status(500).json({
+      error: "Internal server error",
+      ...(sentryId !== undefined && { sentryId }),
+    });
+  },
+);
 
 
 app.listen(env.PORT, () => {
