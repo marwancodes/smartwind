@@ -1,6 +1,5 @@
 
 import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/react';
-import './App.css'
 
 function App() {
 
@@ -15,8 +14,11 @@ function App() {
           <UserButton />
         </Show>
       </header>
+
+      <button className='btn btn-primary'>Sign In</button>
+      
     </>
   )
 }
 
-export default App
+export default App;
