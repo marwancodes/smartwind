@@ -18,6 +18,7 @@ import streamRouter from './routes/stream.router';
 import checkoutRouter from './routes/checkout.router';
 import adminRouter from './routes/admin.router';
 import { sentryClerkUserMiddleware } from './middleware/sentryClerkUser';
+import orderRouter from './routes/order.router';
 
 dotenv.config();
 
@@ -55,6 +56,7 @@ app.use("/api/products", productRouter);
 app.use("/api/stream", streamRouter);
 app.use("/api/checkout", checkoutRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/orders", orderRouter);
 
 
 const publicDir = path.join(process.cwd(), "public");
