@@ -5,9 +5,11 @@ import App from './App.jsx';
 
 import { BrowserRouter } from 'react-router';
 import * as Sentry from "@sentry/react";
+import { SentryErrorFallback } from './components/SentryErrorFallback.jsx';
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ClerkProvider } from '@clerk/react';
+import { SentryUserSync } from './components/SentryUserSync.jsx';
 
 
 const queryClient = new QueryClient();
@@ -47,9 +49,13 @@ Sentry.init({
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ClerkProvider>
+      <SentryUserSync />
+
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <App />
+          <Sentry.ErrorBoundary fallback={<SentryErrorFallback />}>
+            <App />
+          </Sentry.ErrorBoundary>
         </BrowserRouter>
       </QueryClientProvider>
     </ClerkProvider>
