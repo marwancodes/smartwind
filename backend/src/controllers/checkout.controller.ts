@@ -136,10 +136,11 @@ const confirmSchema = z.object({
 });
 
 /**
- * Fallback fulfillment for the /checkout/return page. The Polar webhook is the
- * primary path, but it can't reach a local dev server without a live tunnel, so
- * this verifies the payment directly with Polar and fulfills the session.
- * Idempotent: if the webhook already created the order, we just return it.
+ * Fulfillment for the /checkout/return page. The Polar webhook is the primary
+ * path in production, but it can't reach a local dev server without a live
+ * tunnel, so this verifies the payment directly with Polar and fulfills the
+ * session. Safe to run alongside the webhook: fulfillCheckoutSession claims the
+ * session atomically, so an order is created exactly once.
  */
 export async function confirmCheckout(req: Request, res: Response, next: NextFunction) {
   try {
@@ -176,35 +177,26 @@ export async function confirmCheckout(req: Request, res: Response, next: NextFun
     }
 
     const sessionId = await findSessionByPolarCheckoutId(checkoutId);
-    if (!sessionId) {
-      // Either never created, or already fulfilled (session deleted) by the webhook.
-      const paid = await alreadyPaid(checkout.order_id ?? undefined, checkoutId);
-      if (paid) {
-        res.json({ status: "paid", orderId: paid.id });
+    if (sessionId) {
+      const orderId = await fulfillCheckoutSession(
+        sessionId,
+        checkout.order_id ?? undefined,
+        checkoutId,
+      );
+      if (orderId) {
+        res.json({ status: "paid", orderId });
         return;
       }
-      res.status(404).json({ error: "Checkout session not found" });
-      return;
     }
 
-    const orderId = await fulfillCheckoutSession(
-      sessionId,
-      checkout.order_id ?? undefined,
-      checkoutId,
-    );
-
-    if (orderId) {
-      res.json({ status: "paid", orderId });
-      return;
-    }
-
+    // Session already claimed (likely by the webhook) — return the existing order.
     const paid = await alreadyPaid(checkout.order_id ?? undefined, checkoutId);
     if (paid) {
       res.json({ status: "paid", orderId: paid.id });
       return;
     }
 
-    res.status(500).json({ error: "Checkout fulfillment failed" });
+    res.status(404).json({ error: "Checkout session not found" });
   } catch (e) {
     next(e);
   }

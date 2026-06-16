@@ -1,8 +1,10 @@
 import { Link, useSearchParams } from "react-router";
 import { useCart } from "../store/cart";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { CheckCircle2Icon, PackageIcon } from "lucide-react";
+import { useAuth } from "@clerk/react";
+import { apiFetch } from "../lib/api";
 
 function CheckoutReturnPage() {
   const clearCart = useCart((s) => s.clear);
@@ -11,11 +13,30 @@ function CheckoutReturnPage() {
   const checkoutId = params.get("checkout_id");
 
   const queryClient = useQueryClient();
+  const { getToken } = useAuth();
+  const ranRef = useRef(false);
 
   useEffect(() => {
+    if (ranRef.current) return;
+    ranRef.current = true;
+
     clearCart();
-    queryClient.invalidateQueries({ queryKey: ["orders"] });
-  }, [queryClient, clearCart]);
+
+    (async () => {
+      if (checkoutId) {
+        try {
+          await apiFetch("/api/checkout/confirm", {
+            getToken,
+            method: "POST",
+            body: { checkoutId },
+          });
+        } catch {
+          // Webhook may still complete it; the orders list will refresh below.
+        }
+      }
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+    })();
+  }, [checkoutId, getToken, queryClient, clearCart]);
 
   return (
     <div className="mx-auto max-w-lg text-center">
