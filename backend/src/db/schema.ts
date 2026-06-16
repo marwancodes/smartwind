@@ -2,24 +2,23 @@ import { pgTable, text, integer, timestamp, uuid, boolean, jsonb } from "drizzle
 import { relations } from "drizzle-orm";
 
 export type OrderStatus = "pending" | "paid" | "failed";
-export type UserRole = "admin" | "customer" | "support";
+export type UserRole = "customer" | "support" | "admin";
 
 export type CheckoutSessionLine = {
-    productId: string;
-    quantity: number;
-    unitPriceCents: number;
-}
+  productId: string;
+  quantity: number;
+  unitPriceCents: number;
+};
 
 export const users = pgTable("users", {
-    id: uuid("id").primaryKey().defaultRandom(),
-    clerkUserId: text("clerk_user_id").notNull().unique(),
-    email: text("email").notNull().default(""),
-    displayName: text("display_name"),
-    role: text("role").$type<UserRole>().notNull().default("customer"),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  id: uuid("id").defaultRandom().primaryKey(),
+  clerkUserId: text("clerk_user_id").notNull().unique(),
+  email: text("email").notNull().default(""),
+  displayName: text("display_name"),
+  role: text("role").$type<UserRole>().notNull().default("customer"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
-
 
 export const products = pgTable("products", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -28,7 +27,7 @@ export const products = pgTable("products", {
   category: text("category").notNull().default("General"),
   description: text("description").notNull().default(""),
   priceCents: integer("price_cents").notNull(),
-  currency: text("currency").notNull().default("GBP"),
+  currency: text("currency").notNull().default("usd"),
   imageUrl: text("image_url"),
   /** ImageKit `fileId` for deletes */
   imageKitFileId: text("image_kit_file_id"),
@@ -72,10 +71,9 @@ export const orderItems = pgTable("order_items", {
   quantity: integer("quantity").notNull(),
   unitPriceCents: integer("unit_price_cents").notNull(),
 });
+
 // cascade = “delete children when parent is deleted”; restrict = “don’t delete the parent if any child still points at it.”
 
-
-//** Relations
 // a user can have many orders over time.
 export const usersRelations = relations(users, ({ many }) => ({
   orders: many(orders),

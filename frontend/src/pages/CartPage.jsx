@@ -14,6 +14,7 @@ const CartPage = () => {
     const {
         checkout,
         checkoutLoading,
+        checkoutError,
         items,
         lines,
         productsError,
@@ -123,7 +124,7 @@ const CartPage = () => {
                     <div className="flex justify-between text-sm">
                     <span className="text-base-content/70">Subtotal</span>
                     <span className="font-semibold text-base-content">
-                        {formatPrice(subtotal, lines[0]?.product?.currency ?? "usd")}
+                        {formatPrice(subtotal, lines[0]?.product?.currency ?? "gbp")}
                     </span>
                     </div>
 
@@ -152,6 +153,12 @@ const CartPage = () => {
                         </button>
                     </SignInButton>
                     </Show>
+
+                    {checkoutError && (
+                        <p role="alert" className="mt-3 text-sm text-error">
+                            {checkoutError}
+                        </p>
+                    )}
 
                     <p className="mt-4 flex items-start gap-2 text-xs text-base-content/60">
                     <HeadphonesIcon className="mt-0.5 size-3.5 shrink-0 text-primary" aria-hidden />

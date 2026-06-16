@@ -1,9 +1,11 @@
 import type { Request, Response } from "express";
 import { getEnv } from "../lib/env.js";
-import { checkoutSessions, orderItems, orders } from "../db/schema.js";
-import { eq } from "drizzle-orm";
-import { db } from "../db/index.js";
 import { Webhook } from "standardwebhooks";
+import {
+  alreadyPaid,
+  findSessionByPolarCheckoutId,
+  fulfillCheckoutSession,
+} from "../lib/fulfillment.js";
 
 function headerString(headers: Request["headers"], name: string) {
   const value = headers[name];
@@ -17,73 +19,14 @@ function checkoutSessionIdFromMetadata(order: Record<string, unknown>) {
   return typeof sessionId === "string" ? sessionId : undefined;
 }
 
-async function alreadyPaid(polarOrderId?: string, checkoutId?: string) {
-  if (polarOrderId) {
-    const [row] = await db
-      .select()
-      .from(orders)
-      .where(eq(orders.polarOrderId, polarOrderId))
-      .limit(1);
-    if (row?.status === "paid") return true;
-  }
-  if (checkoutId) {
-    const [row] = await db
-      .select()
-      .from(orders)
-      .where(eq(orders.polarCheckoutId, checkoutId))
-      .limit(1);
-    if (row?.status === "paid") return true;
-  }
-  return false;
-}
-
-async function fulfillCheckoutSession(
-  sessionId: string,
-  polarOrderId: string | undefined,
-  checkoutId: string | undefined,
-) {
-  return await db.transaction(async (tx) => {
-    const [session] = await tx
-      .select()
-      .from(checkoutSessions)
-      .where(eq(checkoutSessions.id, sessionId))
-      .for("update");
-
-    if (!session) return false;
-
-    const [order] = await tx
-      .insert(orders)
-      .values({
-        userId: session.userId,
-        status: "paid",
-        totalCents: session.totalCents,
-        polarCheckoutId: checkoutId ?? session.polarCheckoutId ?? null,
-        ...(polarOrderId ? { polarOrderId } : {}),
-      })
-      .returning();
-
-    if (session.lines.length) {
-      await tx.insert(orderItems).values(
-        session.lines.map((line) => ({
-          orderId: order.id,
-          productId: line.productId,
-          quantity: line.quantity,
-          unitPriceCents: line.unitPriceCents,
-        })),
-      );
-    }
-
-    await tx.delete(checkoutSessions).where(eq(checkoutSessions.id, sessionId));
-
-    return true;
-  });
-}
-
 export async function polarWebhookHandler(req: Request, res: Response) {
   const env = getEnv();
 
+  console.log("[polar webhook] received request");
+
   try {
     if (!env.POLAR_WEBHOOK_SECRET) {
+      console.error("[polar webhook] POLAR_WEBHOOK_SECRET not configured");
       res.status(503).send("Polar webhooks not configured");
       return;
     }
@@ -107,22 +50,32 @@ export async function polarWebhookHandler(req: Request, res: Response) {
       data?: Record<string, unknown>;
     };
 
+    console.log(`[polar webhook] verified event: ${event.type}`);
+
     if (event.type === "order.paid" && event.data) {
       const data = event.data;
       const polarOrderId = typeof data.id === "string" ? data.id : undefined;
       const checkoutId = typeof data.checkout_id === "string" ? data.checkout_id : undefined;
 
       if (await alreadyPaid(polarOrderId, checkoutId)) {
+        console.log("[polar webhook] order already paid, skipping", { polarOrderId, checkoutId });
         res.json({ ok: true, duplicate: true });
         return;
       }
 
-      const sessionId = checkoutSessionIdFromMetadata(data);
+      let sessionId = checkoutSessionIdFromMetadata(data);
+
+      if (!sessionId && checkoutId) {
+        sessionId = await findSessionByPolarCheckoutId(checkoutId);
+      }
+
+      console.log("[polar webhook] resolving session", { sessionId, checkoutId, polarOrderId });
 
       if (sessionId) {
         const ok = await fulfillCheckoutSession(sessionId, polarOrderId, checkoutId);
 
         if (ok) {
+          console.log("[polar webhook] order fulfilled", { sessionId, polarOrderId });
           res.json({ ok: true });
           return;
         }
@@ -140,6 +93,11 @@ export async function polarWebhookHandler(req: Request, res: Response) {
         res.status(500).json({ error: "Checkout fulfillment failed" });
         return;
       }
+
+      console.error("[polar webhook] order.paid but no matching checkout session", {
+        checkoutId,
+        polarOrderId,
+      });
     }
 
     res.json({ ok: true });

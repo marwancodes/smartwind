@@ -65,7 +65,7 @@ const Footer = () => {
 
         <div className="mt-10 space-y-4 border-t border-base-300 pt-6">
           <p className="text-center text-xs text-base-content/50">
-            © {new Date().getFullYear()} MARWAN WARRADI · All prices in GBP
+            © {new Date().getFullYear()} MARWAN WARRADI · All prices in GBP <span className="text-lg">🇬🇧</span>
           </p>
         </div>
       </div>

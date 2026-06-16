@@ -38,3 +38,27 @@ export async function polarCreateCheckout(env: Env, body: CheckoutCreateBody) {
   const data = (await res.json()) as { id: string; url: string };
   return { id: data.id, url: data.url };
 }
+
+export type PolarCheckout = {
+  id: string;
+  status: string;
+  /** Present once an order has been generated for the checkout. */
+  order_id?: string | null;
+  metadata?: Record<string, unknown>;
+};
+
+export async function polarGetCheckout(env: Env, checkoutId: string) {
+  const token = env.POLAR_ACCESS_TOKEN;
+  if (!token) throw new Error("POLAR_ACCESS_TOKEN is not configured");
+
+  const res = await fetch(`${env.POLAR_API_BASE}/v1/checkouts/${checkoutId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Polar get checkout failed: ${res.status} ${errText}`);
+  }
+
+  return (await res.json()) as PolarCheckout;
+}

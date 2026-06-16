@@ -1,5 +1,4 @@
 import express from 'express';
-import morgan from 'morgan';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import { clerkMiddleware } from '@clerk/express';
@@ -19,6 +18,7 @@ import checkoutRouter from './routes/checkout.router';
 import adminRouter from './routes/admin.router';
 import { sentryClerkUserMiddleware } from './middleware/sentryClerkUser';
 import orderRouter from './routes/order.router';
+import { polarWebhookHandler } from './webhooks/polar';
 
 dotenv.config();
 
@@ -28,17 +28,16 @@ const app = express();
 
 const rawJson = express.raw({ type: 'application/json', limit: '1mb' });
 
-app.post('/webhook/clerk', rawJson, (req, res) => {
-  // it's important that you don't parse the webhook event data, it should be in raw format
+//   // it's important that you don't parse the webhook event data, it should be in raw format
+app.post('/webhooks/clerk', rawJson, (req, res) => {
   void clerkWebhookHandler(req, res);
 });
 
-// app.post('/webhook/polar', rawJson, (req, res) => {
-//   // it's important that you don't parse the webhook event data, it should be in raw format
-//   void polarWebhookHandler(req, res);
-// });
+app.post("/webhooks/polar", rawJson, (req, res) => {
+  void polarWebhookHandler(req, res);
+});
 
-app.use(morgan('dev'));
+
 app.use(express.json());
 app.use(cors());
 app.use(clerkMiddleware());
@@ -47,7 +46,7 @@ app.use(sentryClerkUserMiddleware);
 
 // if you're not using req in your route handlers, you can omit it and just use _req to avoid linting errors about unused variables. Same goes for res if you don't use it.
 app.get("/health", (_req, res) => {
-  res.json({ status: "ok" });
+  res.json({ ok: true });
 });
 
 
@@ -83,27 +82,15 @@ if (fs.existsSync(publicDir)) {
 Sentry.setupExpressErrorHandler(app);
 
 
-// todo: add error handler middleware here
-app.use((_err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+app.use((err: unknown, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error(`[error] ${req.method} ${req.path}`, err);
   const sentryId = (res as express.Response & { sentry?: string }).sentry;
 
   res.status(500).json({
     error: "Internal server error",
     ...(sentryId !== undefined && { sentryId }),
   });
-})
-
-
-app.use(
-  (_err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-    const sentryId = (res as express.Response & { sentry?: string }).sentry;
-
-    res.status(500).json({
-      error: "Internal server error",
-      ...(sentryId !== undefined && { sentryId }),
-    });
-  },
-);
+});
 
 
 app.listen(env.PORT, () => {

@@ -5,10 +5,13 @@ import Layout from './components/Layout';
 import { Route, Routes } from 'react-router';
 import HomePage from './pages/HomePage';
 import CartPage from './pages/CartPage';
+import OrdersPage from './pages/OrdersPage';
+import CheckoutReturnPage from './pages/CheckoutReturnPage';
+
 
 function App() {
 
-  const { isLoaded } = useAuth();
+  const { isLoaded, isSignedIn } = useAuth();
 
 
   if(!isLoaded) return <PageLoader />;
@@ -19,6 +22,8 @@ function App() {
 
         <Route path="/" element={<HomePage />} />
         <Route path="/cart" element={<CartPage />} />
+        <Route path="/orders" element={isSignedIn ? <OrdersPage /> : <HomePage />} />
+        <Route path="/checkout/return" element={isSignedIn ? <CheckoutReturnPage /> : <HomePage />} />
 
       </Routes>
       

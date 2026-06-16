@@ -6,7 +6,14 @@ import { getLocalUser } from "../lib/users";
 import { db } from "../db";
 import { CheckoutSessionLine, checkoutSessions, products } from "../db/schema";
 import { and, eq, inArray } from "drizzle-orm";
-import { polarCreateCheckout } from "../lib/polar";
+import { polarCreateCheckout, polarGetCheckout } from "../lib/polar";
+import {
+  alreadyPaid,
+  findSessionByPolarCheckoutId,
+  fulfillCheckoutSession,
+} from "../lib/fulfillment";
+
+const PAID_CHECKOUT_STATUSES = new Set(["succeeded", "confirmed"]);
 
 const env = getEnv();
 
@@ -77,7 +84,7 @@ export async function createCheckout(req: Request, res: Response, next: NextFunc
 
     if (totalCents < 10) {
       res.status(400).json({
-        error: "Total below Polar minimum (e.g. gbp requires at least 10 cents)",
+        error: "Total below Polar minimum (e.g. GBP requires at least 10 cents)",
       });
       return;
     }
@@ -119,6 +126,85 @@ export async function createCheckout(req: Request, res: Response, next: NextFunc
       .where(eq(checkoutSessions.id, session.id));
 
     res.json({ checkoutUrl: checkout.url });
+  } catch (e) {
+    next(e);
+  }
+}
+
+const confirmSchema = z.object({
+  checkoutId: z.string().min(1),
+});
+
+/**
+ * Fallback fulfillment for the /checkout/return page. The Polar webhook is the
+ * primary path, but it can't reach a local dev server without a live tunnel, so
+ * this verifies the payment directly with Polar and fulfills the session.
+ * Idempotent: if the webhook already created the order, we just return it.
+ */
+export async function confirmCheckout(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { userId, isAuthenticated } = getAuth(req);
+    if (!isAuthenticated || !userId) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+
+    const parsed = confirmSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: "Invalid request", details: parsed.error.flatten() });
+      return;
+    }
+
+    if (!env.POLAR_ACCESS_TOKEN) {
+      res.status(503).json({ error: "Payments are not configured" });
+      return;
+    }
+
+    const checkoutId = parsed.data.checkoutId;
+
+    const existing = await alreadyPaid(undefined, checkoutId);
+    if (existing) {
+      res.json({ status: "paid", orderId: existing.id });
+      return;
+    }
+
+    const checkout = await polarGetCheckout(env, checkoutId);
+
+    if (!PAID_CHECKOUT_STATUSES.has(checkout.status)) {
+      res.json({ status: "pending" });
+      return;
+    }
+
+    const sessionId = await findSessionByPolarCheckoutId(checkoutId);
+    if (!sessionId) {
+      // Either never created, or already fulfilled (session deleted) by the webhook.
+      const paid = await alreadyPaid(checkout.order_id ?? undefined, checkoutId);
+      if (paid) {
+        res.json({ status: "paid", orderId: paid.id });
+        return;
+      }
+      res.status(404).json({ error: "Checkout session not found" });
+      return;
+    }
+
+    const orderId = await fulfillCheckoutSession(
+      sessionId,
+      checkout.order_id ?? undefined,
+      checkoutId,
+    );
+
+    if (orderId) {
+      res.json({ status: "paid", orderId });
+      return;
+    }
+
+    const paid = await alreadyPaid(checkout.order_id ?? undefined, checkoutId);
+    if (paid) {
+      res.json({ status: "paid", orderId: paid.id });
+      return;
+    }
+
+    res.status(500).json({ error: "Checkout fulfillment failed" });
   } catch (e) {
     next(e);
   }
