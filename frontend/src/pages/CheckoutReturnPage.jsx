@@ -1,91 +1,47 @@
-import { useEffect, useRef, useState } from "react";
-import { useNavigate, useSearchParams, Link } from "react-router";
-import { CheckCircleIcon, XCircleIcon } from "lucide-react";
-import { useAuth } from "@clerk/react";
-import { useQueryClient } from "@tanstack/react-query";
+import { Link, useSearchParams } from "react-router";
 import { useCart } from "../store/cart";
-import { apiFetch } from "../lib/api";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { CheckCircle2Icon, PackageIcon } from "lucide-react";
 
 function CheckoutReturnPage() {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const { getToken } = useAuth();
-  const queryClient = useQueryClient();
-  const clear = useCart((s) => s.clear);
+  const clearCart = useCart((s) => s.clear);
 
-  const checkoutId = searchParams.get("checkout_id");
-  const [status, setStatus] = useState("confirming");
-  const ranRef = useRef(false);
+  const [params] = useSearchParams();
+  const checkoutId = params.get("checkout_id");
+
+  const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (ranRef.current) return;
-    ranRef.current = true;
-
-    if (!checkoutId) {
-      setStatus("error");
-      return;
-    }
-
-    let cancelled = false;
-
-    (async () => {
-      try {
-        const res = await apiFetch("/api/checkout/confirm", {
-          getToken,
-          method: "POST",
-          body: { checkoutId },
-        });
-
-        if (cancelled) return;
-
-        if (res?.status === "paid") {
-          clear();
-          queryClient.invalidateQueries({ queryKey: ["orders"] });
-          setStatus("paid");
-          setTimeout(() => navigate("/orders", { replace: true }), 1800);
-        } else {
-          // Payment not registered yet; the webhook may still complete it.
-          clear();
-          setStatus("pending");
-          setTimeout(() => navigate("/orders", { replace: true }), 2500);
-        }
-      } catch {
-        if (!cancelled) setStatus("error");
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [checkoutId, getToken, clear, queryClient, navigate]);
-
-  if (status === "error") {
-    return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
-        <XCircleIcon className="size-16 text-error" aria-hidden />
-        <h1 className="text-2xl font-bold text-base-content">We couldn't confirm your order</h1>
-        <p className="max-w-md text-base-content/70">
-          Your payment may still be processing. Check your orders in a moment.
-        </p>
-        <Link to="/orders" className="btn btn-primary">
-          Go to orders
-        </Link>
-      </div>
-    );
-  }
+    clearCart();
+    queryClient.invalidateQueries({ queryKey: ["orders"] });
+  }, [queryClient, clearCart]);
 
   return (
-    <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
-      <CheckCircleIcon className="size-16 text-success" aria-hidden />
-      <h1 className="text-2xl font-bold text-base-content">
-        {status === "paid" ? "Payment successful!" : "Finishing up…"}
-      </h1>
-      <p className="text-base-content/70">
-        {status === "paid"
-          ? "Your order has been placed. Redirecting to your orders…"
-          : "Confirming your payment. Redirecting to your orders…"}
+    <div className="mx-auto max-w-lg text-center">
+      <div className="avatar placeholder mx-auto mb-4">
+        <div className="w-16 rounded-full bg-success/20 text-success flex items-center justify-center">
+          <CheckCircle2Icon className="size-10" aria-hidden />
+        </div>
+      </div>
+
+      <h1 className="text-2xl font-bold text-base-content">Thanks for your order</h1>
+
+      <p className="mt-4 text-base-content/70">
+        Your order is created after payment is confirmed. Open it from your orders list for{" "}
+        <strong className="text-base-content">support chat</strong> (it appears there as{" "}
+        <strong className="text-base-content">paid</strong>). We&apos;ll send video invites in that
+        thread when needed.
       </p>
-      <span className="loading loading-dots loading-md text-primary" aria-hidden />
+
+      {checkoutId ? (
+        <p className="mt-2 font-mono text-xs text-base-content/50">Checkout: {checkoutId}</p>
+      ) : null}
+
+      <Link to="/orders" className="btn btn-primary mt-8 gap-2">
+        <PackageIcon className="size-4" aria-hidden />
+        View orders
+      </Link>
     </div>
   );
 }

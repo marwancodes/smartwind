@@ -5,6 +5,7 @@ import useOrdersPage from "../hooks/useOrdersPage";
 import { Link } from "react-router";
 import { formatOrderWhen, formatPrice } from "../utils/format";
 
+
 function OrdersPage() {
   const { isLoading, error, orders, staff } = useOrdersPage();
 
