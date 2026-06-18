@@ -58,6 +58,11 @@ app.use("/api/admin", adminRouter);
 app.use("/api/orders", orderRouter);
 
 
+// ** Testing Sentry error handling **
+// app.get("/debug-sentry", function mainHandler(_req, _res) {
+//   throw new Error("My fourth Sentry error!");
+// });
+
 const publicDir = path.join(process.cwd(), "public");
 if (fs.existsSync(publicDir)) {
   app.use(express.static(publicDir));
@@ -82,15 +87,16 @@ if (fs.existsSync(publicDir)) {
 Sentry.setupExpressErrorHandler(app);
 
 
-app.use((err: unknown, req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error(`[error] ${req.method} ${req.path}`, err);
-  const sentryId = (res as express.Response & { sentry?: string }).sentry;
+app.use(
+  (_err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    const sentryId = (res as express.Response & { sentry?: string }).sentry;
 
-  res.status(500).json({
-    error: "Internal server error",
-    ...(sentryId !== undefined && { sentryId }),
-  });
-});
+    res.status(500).json({
+      error: "Internal server error",
+      ...(sentryId !== undefined && { sentryId }),
+    });
+  },
+);
 
 
 app.listen(env.PORT, () => {

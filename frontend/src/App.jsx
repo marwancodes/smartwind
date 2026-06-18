@@ -8,6 +8,8 @@ import CartPage from './pages/CartPage';
 import OrdersPage from './pages/OrdersPage';
 import CheckoutReturnPage from './pages/CheckoutReturnPage';
 import ProductDetailPage from './pages/ProductDetailsPage';
+import { SentryDemoPage } from './pages/SentryDemoPage';
+import OrderDetailPage from './pages/OrderDetailPage';
 
 
 function App() {
@@ -26,6 +28,11 @@ function App() {
         <Route path="/products/:slug" element={<ProductDetailPage />} />
         <Route path="/orders" element={isSignedIn ? <OrdersPage /> : <HomePage />} />
         <Route path="/checkout/return" element={isSignedIn ? <CheckoutReturnPage /> : <HomePage />} />
+
+        <Route path="/demo-sentry" element={<SentryDemoPage />} />
+
+        <Route path="/orders/:id" element={<OrderDetailPage />} />
+
 
       </Routes>
       

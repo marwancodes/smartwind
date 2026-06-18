@@ -75,7 +75,7 @@ const CATALOG = [
     name: "Ember Smart Kettle",
     category: "Home",
     description:
-      "Variable temperature 40–100°C, keep-warm 2h, stainless interior, boil-dry protection. App scheduling (Wi‑Fi).",
+      "Variable temperature 40 100°C, keep-warm 2h, stainless interior, boil-dry protection. App scheduling (Wi‑Fi).",
     priceCents: 12900,
     imageUrl: "https://images.unsplash.com/photo-1556911220-bff31c812dba?w=800&q=80",
   },
@@ -89,13 +89,13 @@ const CATALOG = [
     imageUrl: "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=800&q=80",
   },
   {
-    slug: "summit-backpack",
-    name: "Summit 28L Backpack",
+    slug: "traveloo-backpack",
+    name: "Traveloo 30L Backpack",
     category: "Travel",
     description:
-      'Weatherproof shell, lay-flat laptop compartment (16"), luggage pass-through, recycled ripstop. 980 g.',
-    priceCents: 13900,
-    imageUrl: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&q=80",
+      'Water-resistant 30L, padded laptop compartment, anti-theft zippers, USB-C charging port. TSA-approved for carry-on.',
+    priceCents: 4900,
+    imageUrl: "https://images.unsplash.com/photo-1505308144658-03c69861061a?w=800&q=80",
   },
   {
     slug: "voyage-organizer",
@@ -116,20 +116,20 @@ const CATALOG = [
     imageUrl: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&q=80",
   },
   {
-    slug: "prime-lens-35",
-    name: "Prime 35mm f/1.4",
+    slug: "black-nikon-dslr-camera",
+    name: "Black Nikon DSLR Camera",
     category: "Cameras",
     description:
-      "Nano-coated elements, linear AF motor, 0.25 m close focus, 67 mm filter thread. Street & low-light staple.",
+      "24.2 MP, 4K UHD video, 3-inch LCD, 11-point AF system, built-in Wi-Fi and Bluetooth. Ideal for photography enthusiasts.",
     priceCents: 79900,
-    imageUrl: "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=800&q=80",
+    imageUrl: "https://images.unsplash.com/photo-1624913503273-5f9c4e980dba?w=800&q=80",
   },
   {
     slug: "nimbus-hub",
     name: "Nimbus USB-C Hub",
     category: "Accessories",
     description:
-      "2× USB-A 10 Gbps, HDMI 2.1 4K120, SD/microSD UHS-II, 100 W PD passthrough. Aluminum unibody, braided cable.",
+      "2x USB-A 10 Gbps, HDMI 2.1 4K120, SD/microSD UHS-II, 100 W PD passthrough. Aluminum unibody, braided cable.",
     priceCents: 7900,
     imageUrl: "https://images.unsplash.com/photo-1591488320449-011701bb6704?w=800&q=80",
   },
@@ -143,31 +143,58 @@ const CATALOG = [
     imageUrl: "https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=800&q=80",
   },
   {
-    slug: "echo-earbuds",
-    name: "Echo True Wireless",
+    slug: "huawei-earbuds",
+    name: "Huawei FreeBuds Pro 2",
     category: "Audio",
     description:
-      "Adaptive ANC, spatial audio, 8h buds + 28h case, wireless charging. IPX4 sweat resistance.",
-    priceCents: 17900,
-    imageUrl: "https://images.unsplash.com/photo-1484704849700-f032a568e944?w=800&q=80",
+      "Hybrid active noise cancellation, 11 mm dynamic drivers, 6 microphones, 4 mics for ANC, 2 for voice pickup. 30h total battery with charging case.",
+    priceCents: 6500,
+    imageUrl: "https://images.unsplash.com/photo-1731616331098-739bf45618f7?w=800&q=80",
   },
   {
-    slug: "meridian-desk-mat",
-    name: "Meridian Desk Mat XL",
-    category: "Workspace",
+    slug: "gamer-pc",
+    name: "Gamer PC",
+    category: "Computers",
     description:
-      "900×400 mm vegan leather surface, anti-slip base, stitched edges. Coffee & pen safe.",
-    priceCents: 5900,
-    imageUrl: "https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=800&q=80",
+      "High-performance gaming desktop with latest graphics and processing power.",
+    priceCents: 129900,
+    imageUrl: "https://images.unsplash.com/photo-1738245494097-9b1e3971c3eb?w=800&q=80",
   },
   {
-    slug: "atlas-water-bottle",
-    name: "Atlas Insulated Bottle",
+    slug: "salomon-shoes",
+    name: "Salomon Trail Shoes",
     category: "Travel",
     description:
-      "32 oz vacuum stainless, 24h cold / 12h hot, powder coat, leakproof chug cap + optional straw.",
-    priceCents: 3900,
-    imageUrl: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=800&q=80",
+      "Lightweight trail running shoes with excellent grip and comfort for outdoor adventures.",
+    priceCents: 12900,
+    imageUrl: "https://images.unsplash.com/photo-1631287381310-925554130169?w=800&q=80",
+  },
+  {
+    slug: "mclaren-steering-wheel",
+    name: "McLaren Steering Wheel",
+    category: "Computers",
+    description:
+      "High-end racing steering wheel for immersive driving simulation experiences.",
+    priceCents: 49900,
+    imageUrl: "https://images.unsplash.com/photo-1594071737848-95cae1e3b6e8?w=800&q=80",
+  },
+  {
+    slug: "apple-imac",
+    name: "Apple iMac",
+    category: "Computers",
+    description:
+      "24-inch 4.5K Retina display, M1 chip, 8GB RAM, 256GB SSD.",
+    priceCents: 220,
+    imageUrl: "https://images.unsplash.com/photo-1483058712412-4245e9b90334?w=800&q=80",
+  },
+  {
+    slug: "apple-iphone-17",
+    name: "Apple iPhone 17",
+    category: "Computers",
+    description:
+      "6.1-inch Super Retina XDR display, A17 Bionic chip, 256GB storage.",
+    priceCents: 899,
+    imageUrl: "https://images.unsplash.com/photo-1757709608566-4b9fd41a7af5?w=800&q=80",
   },
 ];
 
