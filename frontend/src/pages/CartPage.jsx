@@ -62,7 +62,7 @@ const CartPage = () => {
                             <div className="min-w-0 flex-1">
                                 <div className="card-title text-base">
                                 {p ? (
-                                    <Link to={`/product/${p.slug}`} className="link-hover link-primary">
+                                    <Link to={`/products/${p.slug}`} className="link-hover link-primary">
                                     {p.name}
                                     </Link>
                                 ) : (
