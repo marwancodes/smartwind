@@ -43,12 +43,8 @@ export function HomeHero({ categories, loadingCategories }) {
 
       <div className="relative grid gap-10 p-8 md:grid-cols-[1.1fr_0.9fr] md:items-center md:p-12 lg:p-14">
         <div className="text-left">
-          <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-            <SparklesIcon className="size-3.5" aria-hidden />
-            Curated tech &amp; workspace gear
-          </span>
 
-          <h1 className="mt-5 text-4xl font-bold leading-[1.05] tracking-tight text-base-content md:text-5xl lg:text-6xl">
+          <h1 className="text-4xl font-bold leading-[1.05] tracking-tight text-base-content md:text-5xl lg:text-6xl">
             Hardware &amp; workspace,
             <span className="block bg-linear-to-r from-primary to-secondary bg-clip-text text-transparent">
               ready to ship
