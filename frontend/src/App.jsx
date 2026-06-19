@@ -10,6 +10,7 @@ import CheckoutReturnPage from './pages/CheckoutReturnPage';
 import ProductDetailPage from './pages/ProductDetailsPage';
 import { SentryDemoPage } from './pages/SentryDemoPage';
 import OrderDetailPage from './pages/OrderDetailPage';
+import OrderSummaryPage from './pages/OrderSummaryPage';
 
 
 function App() {
@@ -31,7 +32,10 @@ function App() {
 
         <Route path="/demo-sentry" element={<SentryDemoPage />} />
 
-        <Route path="/orders/:id" element={<OrderDetailPage />} />
+        {/* NESTED ROUTES */}
+        <Route path="/orders/:id" element={<OrderDetailPage />}>
+          <Route index element={<OrderSummaryPage />} />
+        </Route>
 
 
       </Routes>

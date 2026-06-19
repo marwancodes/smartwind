@@ -2,5 +2,5 @@
 /* @plugin "daisyui"; */
 
 @plugin "daisyui" {
-  themes: silk --default;
+  themes: lofi --default;
 }
