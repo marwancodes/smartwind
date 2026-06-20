@@ -10,7 +10,8 @@ import CheckoutReturnPage from './pages/CheckoutReturnPage';
 import ProductDetailPage from './pages/ProductDetailsPage';
 import { SentryDemoPage } from './pages/SentryDemoPage';
 import OrderDetailPage from './pages/OrderDetailPage';
-import OrderSummaryPage from './pages/OrderSummaryPage';
+import OrderSummaryPage from './components/OrderSummaryPage';
+import OrderChatPage from './components/OrderChatPage';
 
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
         {/* NESTED ROUTES */}
         <Route path="/orders/:id" element={<OrderDetailPage />}>
           <Route index element={<OrderSummaryPage />} />
+          <Route path="chat" element={<OrderChatPage />} />
         </Route>
 
 

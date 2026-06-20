@@ -7,7 +7,6 @@ import {
   PackageIcon,
   SettingsIcon,
   ShoppingBagIcon,
-  StoreIcon,
   ShoppingCartIcon,
 } from "lucide-react";
 import { useCart } from "../store/cart";
@@ -34,11 +33,8 @@ const Navbar = () => {
         <div className="flex-1">
           <Link
             to="/"
-            className="btn btn-ghost gap-2 px-2 font-mono text-lg font-semibold uppercase tracking-wide"
+            className="gap-2 px-2 font-mono text-lg font-semibold uppercase tracking-wide"
           >
-            <span className="flex size-10 items-center justify-center rounded-lg bg-primary/15 p-1 text-primary">
-              <StoreIcon className="size-6" aria-hidden />
-            </span>
             <span className="leading-none">SmartWind</span>
           </Link>
         </div>
