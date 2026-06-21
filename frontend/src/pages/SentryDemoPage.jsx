@@ -35,7 +35,7 @@ function sendPaymentDeclinedError() {
       area: "payments",
       paymentIntentId,
       amountUsd: 184.5,
-      currency: "usd",
+      currency: "gbp",
     }),
   );
   checkoutBreadcrumbs();
@@ -69,7 +69,7 @@ function sendPaymentDeclinedError() {
     scope.setLevel("error");
     scope.setContext("payment", {
       amountUsd: 184.5,
-      currency: "usd",
+      currency: "gbp",
       last4: "4242",
       declineCode: "card_declined",
       networkDeclineCode: "05",

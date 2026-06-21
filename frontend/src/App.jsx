@@ -13,6 +13,7 @@ import OrderDetailPage from './pages/OrderDetailPage';
 import OrderSummaryPage from './components/OrderSummaryPage';
 import OrderChatPage from './components/OrderChatPage';
 import OrderVideoPage from './pages/OrderVideoPage';
+import AdminProductsPage from './pages/AdminProductsPage';
 
 
 function App() {
@@ -35,6 +36,8 @@ function App() {
         <Route path="/demo-sentry" element={<SentryDemoPage />} />
 
         <Route path="/orders/:id/call" element={isSignedIn ? <OrderVideoPage /> : <HomePage />} />
+
+        <Route path="/admin" element={isSignedIn ? <AdminProductsPage /> : <HomePage />} />
 
         {/* NESTED ROUTES */}
         <Route path="/orders/:id" element={<OrderDetailPage />}>
