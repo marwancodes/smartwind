@@ -33,8 +33,11 @@ const Navbar = () => {
         <div className="flex-1">
           <Link
             to="/"
-            className="gap-2 px-2 font-mono text-lg font-semibold uppercase tracking-wide"
+            className="flex items-center gap-2 px-2 font-mono text-lg font-semibold uppercase tracking-wide"
           >
+            <span className="flex size-10 items-center justify-center p-1 text-primary">
+              <img src="/assets/SmartWindLogo.png" alt="SmartWind Logo" className="h-6 w-8" />
+            </span>
             <span className="leading-none">SmartWind</span>
           </Link>
         </div>

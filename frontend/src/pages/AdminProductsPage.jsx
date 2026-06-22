@@ -1,4 +1,5 @@
 
+import { Navigate } from "react-router";
 import { useAdminProductsPage } from "../hooks/useAdminProductsPage.js";
 import { AdminProductsTableSkeleton } from "../components/LoadingSkeletons.jsx";
 import { IK_PRESETS, imageKitOptimizedUrl } from "../lib/imagekitUrl.js";
