@@ -14,6 +14,7 @@ import OrderSummaryPage from './components/OrderSummaryPage';
 import OrderChatPage from './components/OrderChatPage';
 import OrderVideoPage from './pages/OrderVideoPage';
 import AdminProductsPage from './pages/AdminProductsPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 
 function App() {
@@ -45,6 +46,8 @@ function App() {
           <Route path="chat" element={<OrderChatPage />} />
         </Route>
 
+        {/* 404 Route */}
+        <Route path="*" element={<NotFoundPage />} />
 
       </Routes>
       
